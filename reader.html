@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX Reader</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <style>
+        #sidebar {
+            border-bottom-left-radius: 25px;
+            border-top-left-radius: 25px;
+            position: absolute;
+            background-color: #efefef;
+            padding: 10px;
+            top: 5px;
+            right: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <iframe src="index.html" style="width:100%; height:99vh; border:none;"></iframe>
+    <div id="sidebar" role="button" aria-expanded="false" tabindex="0" title="Open toolbar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd"
+                d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+        </svg>
+    </div>
+
+    <div id="toolbar" aria-hidden="true" role="complementary">
+        <button id="toolbarClose" class="btn btn-sm btn-light" aria-label="Close toolbar" title="Close"
+            style="position:absolute; left:10px; top:10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x"
+                viewBox="0 0 16 16" aria-hidden="true">
+                <path
+                    d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+            </svg>
+        </button>
+
+        <div style="padding:48px 16px 16px; overflow:auto; height:100%;">
+            <!-- toolbar content -->
+            <h5>APEX PastPapers</h5>
+            <div class="btn-group-vertical w-100">
+                <button class="btn btn-outline-primary mb-2" onclick="navigate('/')">Go Home</button>
+                <button class="btn btn-outline-secondary mb-2" onclick="navigate('/9709')">9709</button>
+                <button class="btn btn-outline-success" onclick="navigate('/9702')">9702</button>
+            </div>
+            <div class="footer text-muted text-sm" style="bottom: 10px;position:absolute;font-size: small;text-justify:center;">
+                APEX PastPapers software written by Dalton Ma (<a class="link" href="https://github.com/bohrium2b">bohrium2b</a>). Papers are written and copyrighted by Cambridge Assessment International Education. Cambridge Assessment International Education is part of Cambridge Assessment. Cambridge Assessment is the brand name of the University of Cambridge
+Local Examinations Syndicate (UCLES), which is a department of the University of Cambridge.
+            </div>
+        </div>
+    </div>
+
+    <div id="toolbarOverlay" tabindex="-1" aria-hidden="true"></div>
+
+    <style>
+        /* sliding toolbar */
+        #toolbar {
+            position: fixed;
+            top: 0;
+            right: -340px;
+            width: 340px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+            transition: right 0.28s ease;
+            z-index: 1060;
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            padding-top: 8px;
+        }
+
+        #toolbar.open {
+            right: 0;
+        }
+
+        #toolbarOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.32);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.28s ease;
+            z-index: 1055;
+        }
+
+        #toolbarOverlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* keep the small sidebar button above overlay */
+        #sidebar {
+            z-index: 1070;
+            cursor: pointer;
+        }
+
+        /* simple focus outline for accessibility */
+        #sidebar:focus {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
+        }
+
+        #sidebar[aria-expanded="true"] {
+            display: none;
+        }
+    </style>
+
+    <script>
+        
+        var $sidebar = $('#sidebar');
+        var $toolbar = $('#toolbar');
+        var $overlay = $('#toolbarOverlay');
+        var $close = $('#toolbarClose');
+
+        function openToolbar() {
+            $toolbar.addClass('open').attr('aria-hidden', 'false');
+            $overlay.addClass('open').attr('aria-hidden', 'false');
+            $sidebar.attr('aria-expanded', 'true');
+        }
+        function closeToolbar() {
+            $toolbar.removeClass('open').attr('aria-hidden', 'true');
+            $overlay.removeClass('open').attr('aria-hidden', 'true');
+            $sidebar.attr('aria-expanded', 'false').focus();
+        }
+
+        $sidebar.on('click', openToolbar)
+            .on('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openToolbar(); }
+            });
+
+        $close.on('click', closeToolbar);
+        $overlay.on('click', closeToolbar);
+
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape') closeToolbar();
+        });
+        
+        // When the iframe changes url, set the url in the document's hash parameter
+        var $iframe = $('iframe');
+
+        function setHashFromIframe() {
+            var url;
+            try {
+                url = $iframe[0].contentWindow.location.href;
+            } catch (err) {
+                // cross-origin or other restriction: fall back to src attribute
+                url = $iframe.attr('src');
+            }
+            if (url) {
+                var encoded = encodeURIComponent(url);
+                if (location.hash.slice(1) !== encoded) {
+                    location.hash = encoded;
+                }
+            }
+        }
+
+        function setIframeFromHash() {
+            var h = location.hash.slice(1);
+            if (!h) return;
+            try { h = decodeURIComponent(h); } catch (e) {}
+            if ($iframe.attr('src') !== h) {
+                $iframe.attr('src', h);
+            }
+        }
+
+        // update hash when iframe loads / navigates
+        $iframe.on('load', setHashFromIframe);
+
+        // update iframe when hash changes
+        $(window).on('hashchange', setIframeFromHash);
+
+        // initialize iframe from hash on page load
+        setIframeFromHash();
+            
+        
+
+        function navigate(url) {
+            // Close toolbar
+            closeToolbar();
+            // Navigate to the url in the iframe
+            $("iframe")[0].contentWindow.location.href = url;
+        }
+    </script>
+</body>
+
+</html>
